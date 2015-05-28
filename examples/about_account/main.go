@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD 3-Clause license that can be
 // found in the LICENSE file.
 
+// This example shows how to get current user account information.
 package main
 
 import (
@@ -32,7 +33,6 @@ func main() {
 		fmt.Printf("Error: %s\n", err.Error())
 		return
 	}
-
 	fmt.Printf("ID: %s\n"+
 		"Name:\n"+
 		"\tGiven name: %s\n"+
