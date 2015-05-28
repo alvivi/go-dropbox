@@ -134,6 +134,9 @@ func (e Error) Error() string {
 }
 
 func checkContentType(res *http.Response, ctype string) bool {
+	if _, ok := res.Header["Content-Type"]; !ok {
+		return false
+	}
 	ctypeHeaderStr := strings.TrimSpace(res.Header.Get("Content-Type"))
 	return strings.HasPrefix(ctypeHeaderStr, ctype)
 }

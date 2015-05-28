@@ -14,7 +14,7 @@ func TestNewClient(t *testing.T) {
 	c := NewClient(nil)
 
 	if got, want := c.client, http.DefaultClient; got != want {
-		t.Errorf("NewClient client is not http.DefaultClient", got, want)
+		t.Error("NewClient client is not http.DefaultClient")
 	}
 	if got, want := c.BaseURL.String(), defaultBaseURL; got != want {
 		t.Errorf("NewClient BaseURL is %v, want %v", got, want)
@@ -24,5 +24,25 @@ func TestNewClient(t *testing.T) {
 	}
 	if got, want := c.UserAgent, userAgent; got != want {
 		t.Errorf("NewClient UserAgent is %v, want %v", got, want)
+	}
+}
+
+func TestCheckContentType(t *testing.T) {
+	res := &http.Response{}
+	if checkContentType(res, "") {
+		t.Error("checkContentType on an empty response must return always false")
+	}
+	res.Header = http.Header{}
+	res.Header.Add("Content-Type", "")
+	if !checkContentType(res, "") {
+		t.Error("checkContentType({Content-Type: \"\"}, \"\") returned false")
+	}
+	res.Header.Set("Content-Type", "  \n\t   application/json")
+	if !checkContentType(res, "") {
+		t.Error("checkContentType is no trimming strings")
+	}
+	res.Header.Set("Content-Type", "application/json;q=0.8")
+	if !checkContentType(res, "application/json") {
+		t.Error("checkContentType({Content-Type: \"application/json\"}, \"application/json\") returned false")
 	}
 }
