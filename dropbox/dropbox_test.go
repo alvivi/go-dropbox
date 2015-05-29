@@ -6,6 +6,8 @@ package dropbox
 
 import (
 	"bytes"
+	"errors"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"testing/iotest"
@@ -86,5 +88,59 @@ func TestCheckResponse(t *testing.T) {
 	res.Body = ioutil.NopCloser(bytes.NewBufferString("{\"reason\":\"db-error\"}"))
 	if got, want := checkResponse(res), error(Error{"db-error"}); got != want {
 		t.Errorf("checkResponse({StatusCode: 500, \"application/json\", Body:\"{\"reason\":\"db-error\"}\"}) returned %v, want %v", got, want)
+	}
+}
+
+func TestNewRequest(t *testing.T) {
+	c := NewClient(nil)
+
+	inURL, outURL := "/foo", defaultBaseURL+"foo"
+	req, err := c.newRequest("GET", inURL, nil)
+
+	if got, want := err, error(nil); got != want {
+		t.Errorf("newRequest returned %v, want %v", got, want)
+	}
+
+	if got, want := req.URL.String(), outURL; got != want {
+		t.Errorf("newRequest(%q) URL is %v, want %v", inURL, got, want)
+	}
+
+	if got, want := req.Header.Get("User-Agent"), c.UserAgent; got != want {
+		t.Errorf("NewRequest() User-Agent is %v, want %v", got, want)
+	}
+}
+
+func TestNewRequest_invalidURL(t *testing.T) {
+	c := NewClient(nil)
+	_, err := c.newRequest("GET", "%$&!", nil)
+	if err == nil {
+		t.Errorf("newRequest(invalid URL) returned no error")
+	}
+}
+
+func TestNewRequest_bodyWritter(t *testing.T) {
+	c := NewClient(nil)
+	errorBw := func(w io.Writer) error {
+		return errors.New("bw-error")
+	}
+	_, err := c.newRequest("GET", "/bar", errorBw)
+	if got, want := err, errors.New("bw-error"); got.Error() != want.Error() {
+		t.Errorf("newRequest(invalid body writer) returned %v, want %v", got, want)
+	}
+
+	idBw := func(s string) func(w io.Writer) error {
+		return func(w io.Writer) error {
+			bytes.NewBufferString(s).WriteTo(w)
+			return nil
+		}
+	}
+	req, err := c.newRequest("GET", "/qux", idBw("a nice body"))
+	if err != nil {
+		t.Errorf("newRequest(...) expected no error, got %v", err)
+	}
+	blob, _ := ioutil.ReadAll(req.Body)
+	bodyStr := bytes.NewBuffer(blob).String()
+	if got, want := bodyStr, "a nice body"; got != want {
+		t.Errorf("newRequest(...) Request.Body is %v, want %v", got, want)
 	}
 }
