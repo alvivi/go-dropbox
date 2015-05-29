@@ -120,7 +120,7 @@ func (c *Client) DoRPC(req *RPCRequest, v interface{}) (*http.Response, error) {
 // is provided.
 type UnexpectedError struct{}
 
-func (e UnexpectedError) Error() string {
+func (e *UnexpectedError) Error() string {
 	return "unexpected error"
 }
 
@@ -129,7 +129,7 @@ type Error struct {
 	Reason string `json:"reason"`
 }
 
-func (e Error) Error() string {
+func (e *Error) Error() string {
 	return e.Reason
 }
 
@@ -152,16 +152,16 @@ func checkResponse(res *http.Response) error {
 		if err != nil {
 			return err
 		}
-		return dpErr
+		return &dpErr
 	}
 	if checkContentType(res, "text/plain") {
 		buf, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			return err
 		}
-		return Error{string(buf)}
+		return &Error{string(buf)}
 	}
-	return UnexpectedError{}
+	return &UnexpectedError{}
 }
 
 func (c *Client) newRequest(method, urlStr string, bw func(io.Writer) error) (*http.Request, error) {
