@@ -6,24 +6,13 @@ package dropbox
 
 import "net/http"
 
-// AccountInfo containes a Dropbox user account information.
+// AccountInfo contains a Dropbox user account information.
 type AccountInfo struct {
 	// The user's unique Dropbox ID.
 	ID string `json:"account_id"`
 
-	Name struct {
-		// The user's given name.
-		GivenName string `json:"given_name"`
-
-		// The user's surname.
-		Surname string `json:"surname"`
-
-		// The locale-dependent familiar name for the user.
-		FamiliarName string `json:"familiar_name"`
-
-		// The user's display name.
-		DisplayName string `json:"display_name"`
-	} `json:"name"`
+	// The user's name
+	Name Username `json:"name"`
 
 	// The user's e-mail.
 	Email string `json:"email"`
@@ -39,6 +28,21 @@ type AccountInfo struct {
 
 	// If true, there is a paired account associated with this user.
 	IsPaired bool `json:"is_paired"`
+}
+
+// Username contains information about an user name.
+type Username struct {
+	// The user's given name.
+	GivenName string `json:"given_name"`
+
+	// The user's surname.
+	Surname string `json:"surname"`
+
+	// The locale-dependent familiar name for the user.
+	FamiliarName string `json:"familiar_name"`
+
+	// The user's display name.
+	DisplayName string `json:"display_name"`
 }
 
 // GetAccount retrieves information about the current user account.
