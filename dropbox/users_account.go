@@ -47,7 +47,6 @@ type Username struct {
 
 // GetAccount retrieves information about the current user account.
 func (s *UsersService) GetAccount() (*AccountInfo, *http.Response, error) {
-	_ = "breakpoint"
 	req, err := s.client.NewRPCRequest("POST", "2-beta/users/get_current_account", nil)
 	if err != nil {
 		return nil, nil, err

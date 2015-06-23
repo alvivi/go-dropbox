@@ -29,14 +29,28 @@ func (d dropboxPackage) NewClient(c *http.Client) *Client {
 }
 
 func setupExampleServer() {
-	exampleMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		info := AccountInfo{
-			Name: Username{
-				DisplayName: "Drew",
-			},
-		}
-		json.NewEncoder(w).Encode(info)
-	})
+	exampleMux.HandleFunc("/2-beta/users/get_current_account",
+		func(w http.ResponseWriter, r *http.Request) {
+			info := AccountInfo{
+				Name: Username{
+					DisplayName: "Drew",
+				},
+			}
+			json.NewEncoder(w).Encode(info)
+		})
+
+	exampleMux.HandleFunc("/2-beta/files/list_folder",
+		func(w http.ResponseWriter, r *http.Request) {
+			resp := listResponse{
+				Entries: []Entry{
+					Entry{Name: "James.jpg"},
+					Entry{Name: "Mary.jpg"},
+					Entry{Name: "Richard.jpg"},
+					Entry{Name: "Susan.jpg"},
+				},
+			}
+			json.NewEncoder(w).Encode(resp)
+		})
 }
 
 func TestMain(m *testing.M) {

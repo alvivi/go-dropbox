@@ -10,7 +10,21 @@ type Entry struct {
 	Name string `json:"name"`
 }
 
+type listResponse struct {
+	Entries []Entry           `json:"entries"`
+	Footer  listReponseFooter `json:"footer"`
+}
+
+type listReponseFooter struct {
+	Cursor  string `json:"cursor,omitempty"`
+	HasMore bool   `json:"has_more"`
+}
+
 func (s *FilesService) ListFolder(path string) (entries []Entry, resp *http.Response, err error) {
+	if path == "/" {
+		path = ""
+	}
+
 	cursor := ""
 	for {
 		var ents []Entry
@@ -38,14 +52,7 @@ func (s *FilesService) listFolder(path, cursor string) (entries []Entry, nextCur
 		return
 	}
 
-	var respData struct {
-		Entries []Entry `json:"entries"`
-		Footer  struct {
-			Cursor  string `json:"cursor,omitempty"`
-			HasMore bool   `json:"has_more"`
-		} `json:"footer"`
-	}
-
+	var respData listResponse
 	resp, err = s.client.DoRPC(req, &respData)
 	if err != nil {
 		return
